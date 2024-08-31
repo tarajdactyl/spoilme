@@ -21,16 +21,12 @@ impl Handler{
         let ref_msg = ctx.http.get_message(channel_id, message_id).await?;
         //println!("Got referenced message: {:?}\n\n",ref_msg);
 
-        //println!("Attachments to spoil:");
         let mut attachments: Vec<CreateAttachment> = vec!();
         for attachment in &ref_msg.attachments{
-            //println!(" - {:?}", attachment.url);
-
             let mut spoiled_attachment = CreateAttachment::url(&ctx, &attachment.url).await?;
             if ! spoiled_attachment.filename.starts_with("SPOILER_") {
                 spoiled_attachment.filename = format!("SPOILER_{}",spoiled_attachment.filename);
             }
-            //println!("filename: {}", spoiled_attachment.filename);
             attachments.push(spoiled_attachment);
 
         }
@@ -48,7 +44,9 @@ impl Handler{
             builder.push('\n').push_quote(&ref_msg.content);
         }
 
-        channel_id.send_files(&ctx, attachments, CreateMessage::new().content(builder.build())).await?;
+        channel_id.send_files(&ctx, attachments,
+                              CreateMessage::new().content(builder.build()))
+            .await?;
         ref_msg.delete(&ctx).await
     }
 }
