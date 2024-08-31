@@ -15,7 +15,7 @@ struct Handler;
 impl Handler{
 
     async fn handle_spoilme(ctx: Context, channel_id: ChannelId, message_id: MessageId) ->
-        SerenityResult<Message>{
+        SerenityResult<()>{
 
         // TODO: this errors out if there are reactions!! error about burst_colours
         let ref_msg = ctx.http.get_message(channel_id, message_id).await?;
@@ -23,7 +23,7 @@ impl Handler{
 
         //println!("Attachments to spoil:");
         let mut attachments: Vec<CreateAttachment> = vec!();
-        for attachment in ref_msg.attachments{
+        for attachment in &ref_msg.attachments{
             //println!(" - {:?}", attachment.url);
 
             let mut spoiled_attachment = CreateAttachment::url(&ctx, &attachment.url).await?;
@@ -45,10 +45,11 @@ impl Handler{
         }
         builder.push('_'); // end italic
         if !ref_msg.content.is_empty() {
-            builder.push('\n').push_quote(ref_msg.content);
+            builder.push('\n').push_quote(&ref_msg.content);
         }
 
-        channel_id.send_files(&ctx, attachments, CreateMessage::new().content(builder.build())).await
+        channel_id.send_files(&ctx, attachments, CreateMessage::new().content(builder.build())).await?;
+        ref_msg.delete(&ctx).await
     }
 }
 
