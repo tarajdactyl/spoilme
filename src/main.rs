@@ -6,7 +6,9 @@ use serenity::model::id::{ChannelId, MessageId};
 use serenity::model::gateway::Ready;
 use serenity::builder::{CreateAttachment, CreateMessage};
 use serenity::Result as SerenityResult;
+use serenity::utils::MessageBuilder;
 use serenity::prelude::*;
+use serenity::utils::FormattedTimestamp;
 
 struct Handler;
 
@@ -32,8 +34,21 @@ impl Handler{
             attachments.push(spoiled_attachment);
 
         }
-        let builder = CreateMessage::new().content(ref_msg.content);
-        channel_id.send_files(&ctx, attachments, builder).await
+
+        let mut builder = MessageBuilder::new();
+        builder.mention(&ref_msg.author)
+            .push(format!("\n_ {}",FormattedTimestamp::from(ref_msg.timestamp)));
+        if let Some(edit_ts) = ref_msg.edited_timestamp{
+            builder.push(" (edited at ")
+            .push(FormattedTimestamp::from(edit_ts).to_string())
+            .push(")");
+        }
+        builder.push('_'); // end italic
+        if !ref_msg.content.is_empty() {
+            builder.push('\n').push_quote(ref_msg.content);
+        }
+
+        channel_id.send_files(&ctx, attachments, CreateMessage::new().content(builder.build())).await
     }
 }
 
