@@ -18,7 +18,7 @@ impl Handler{
         SerenityResult<()>{
 
         // TODO: this errors out if there are reactions!! error about burst_colours
-        let ref_msg = ctx.http.get_message(channel_id, message_id).await?;
+        let ref_msg = channel_id.message(&ctx, message_id).await?;
         //println!("Got referenced message: {:?}\n\n",ref_msg);
 
         let mut attachments: Vec<CreateAttachment> = vec!();

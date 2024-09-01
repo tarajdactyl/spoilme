@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serenity = "0.12.2"
+# 0.12.2 has a bug deserializing messages so we can't use it
+#serenity = "0.12.2"
+serenity = { git="https://github.com/serenity-rs/serenity.git", branch="current" }
 tokio = { version = "1.4.0", features = ["macros", "rt-multi-thread"] }
